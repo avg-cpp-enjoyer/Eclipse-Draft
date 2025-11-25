@@ -1,4 +1,6 @@
 #include "Application.hpp"
+#include <engine/GraphicsDevice.hpp>
+#include <thread>
 
 int Application::Initialize(int width, int height) {
 	if (!m_mainWindow.Create(L"Eclipse Draft", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
@@ -13,12 +15,10 @@ int Application::Exec(int cmdShow) {
 
 	MSG msg{};
 	while (msg.message != WM_QUIT) {
+		GraphicsDevice::ExecuteRenderJobs();
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-		} else {
-			GraphicsDevice::ExecuteRenderJobs();
-			std::this_thread::sleep_for(std::chrono::milliseconds(2));
 		}
 	}
 	return static_cast<int>(msg.wParam);

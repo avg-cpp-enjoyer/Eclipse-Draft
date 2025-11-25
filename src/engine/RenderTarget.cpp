@@ -50,7 +50,7 @@ void RenderTarget::HandleResize() {
 	m_swapChain->ResizeBuffers(0, newWidth, newHeight, DXGI_FORMAT_UNKNOWN, 0);
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
 	m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
-	GraphicsDevice::D3D11Device()->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_rtv);
+	HR_LOG(GraphicsDevice::D3D11Device()->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_rtv));
 	m_depthStencilView.Reset();
 	m_depthStencilBuffer.Reset();
 	InitDepthStencilView();

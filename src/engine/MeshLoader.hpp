@@ -10,12 +10,14 @@
 struct Face {
 	std::vector<size_t> triOrder;
 	size_t numTris;
+	size_t smoothGroup;
 };
 
 struct VertexKey {
 	DirectX::XMFLOAT3A pos;
 	DirectX::XMFLOAT3A norm;
 	DirectX::XMFLOAT2A uv;
+	size_t smoothGroup;
 
 	bool operator==(const VertexKey& other) const {
 		return memcmp(this, &other, sizeof(VertexKey)) == 0;
@@ -27,7 +29,8 @@ struct VertexKeyHasher {
 		size_t h1 = std::hash<float>{}(v.pos.x)  ^ (std::hash<float>{}(v.pos.y) << 1)  ^ (std::hash<float>{}(v.pos.z) << 2);
 		size_t h2 = std::hash<float>{}(v.norm.x) ^ (std::hash<float>{}(v.norm.y) << 1) ^ (std::hash<float>{}(v.norm.z) << 2);
 		size_t h3 = std::hash<float>{}(v.uv.x)   ^ (std::hash<float>{}(v.uv.y) << 1);
-		return h1 ^ (h2 << 1) ^ (h3 << 2);
+		size_t h4 = std::hash<uint32_t>{}(v.smoothGroup);
+		return (((h1 ^ h2) << 1) ^ h3) ^ (h4 << 1);
 	}
 };
 

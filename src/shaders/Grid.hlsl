@@ -54,7 +54,7 @@ float4 PSMain(VSOutput input) : SV_TARGET {
 
     float mask = max(max(lineMask, majorMask), max(ax, az));
     float dist = distance(input.worldPos, cameraPos);
-    float fade = saturate(1.0 - dist / fadeDistance);
+    float fade = saturate(1.0 - dist / 50.0f);
     float alpha = baseAlpha * saturate(mask) * fade;
 
     return float4(col, alpha);

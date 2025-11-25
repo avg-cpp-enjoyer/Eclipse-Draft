@@ -30,6 +30,9 @@ void Mesh::Draw(ID3D11DeviceContext* context) const {
 	uint32_t stride = sizeof(Vertex);
 	uint32_t offset = 0;
 
+	context->RSSetState(GraphicsDevice::GridRasterizerState());
+	context->OMSetDepthStencilState(nullptr, 0);
+	context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 	context->IASetInputLayout(GraphicsDevice::InputLayout());
 	context->VSSetShader(GraphicsDevice::VertexShader(), nullptr, 0);
 	context->PSSetShader(GraphicsDevice::PixelShader(), nullptr, 0);

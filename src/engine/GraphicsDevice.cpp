@@ -192,7 +192,6 @@ void GraphicsDevice::InitShaders() {
 	Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
 	Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
 	Microsoft::WRL::ComPtr<ID3DBlob> gridPsBlob;
-	Microsoft::WRL::ComPtr<ID3DBlob> gridVsBlob;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
 
 	HR_LOG(D3DCompileFromFile(L"src\\shaders\\VertexShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0",
