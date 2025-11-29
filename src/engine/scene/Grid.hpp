@@ -1,4 +1,4 @@
-#include "Mesh.hpp"
+#include <engine/mesh/Mesh.hpp>
 
 class Grid : public Mesh {
 public:

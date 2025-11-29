@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Win32Base.hpp"
-#include "engine/Renderer.hpp"
 
-#include <windowsx.h>
+#include <engine/core/Renderer.hpp>
+#include <optional>
 
 class MainWindow : public Win32Base<MainWindow> {
 public:
@@ -17,6 +17,6 @@ private:
 	void OnDestroy();
 	void OnSizeChanged();
 private:
-	std::unique_ptr<MainRenderer> m_renderer;
+	std::optional<Renderer> m_renderer;
 	bool m_pendingResize = false;
 };

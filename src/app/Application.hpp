@@ -1,9 +1,6 @@
 #pragma once
 
-#include "engine/GraphicsDevice.hpp"
 #include "MainWindow.hpp"
-
-#include <chrono>
 
 class Application {
 public:

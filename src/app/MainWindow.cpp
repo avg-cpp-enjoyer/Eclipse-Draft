@@ -1,5 +1,8 @@
 #include "MainWindow.hpp"
 
+#include <windowsx.h>
+#include <engine/core/GraphicsDevice.hpp>
+
 const wchar_t* MainWindow::ClassName() const {
 	return L"EclipseMainWindow";
 }
@@ -36,7 +39,7 @@ intptr_t MainWindow::HandleMessage(uint32_t msg, uintptr_t wParam, intptr_t lPar
 
 void MainWindow::OnCreate() {
 	GraphicsDevice::Initialize();
-	m_renderer = std::make_unique<MainRenderer>(m_window);
+	m_renderer.emplace(m_window);
 	m_renderer->Start(THREAD_PRIORITY_ABOVE_NORMAL, 1ULL << 1);
 }
 

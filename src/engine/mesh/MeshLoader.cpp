@@ -16,7 +16,7 @@ Mesh MeshLoader::LoadFromOBJ(const std::string& path, ID3D11Device* device) {
 
 	bool hasSmoothGroups = false;
 
-	auto parseFaceToken = [](const std::string& token, uint32_t& vIdx, uint32_t& tIdx, uint32_t& nIdx) {
+	auto parseFaceToken = [](const std::string& token, uint32_t& vIdx, uint32_t& tIdx, uint32_t& nIdx) -> void {
 		vIdx = tIdx = nIdx = 0;
 		std::stringstream ss(token);
 		std::string part;
@@ -91,10 +91,10 @@ Mesh MeshLoader::LoadFromOBJ(const std::string& path, ID3D11Device* device) {
 				uint32_t idx0;
 				if (it0 == uniqueVerts.end()) {
 					Vertex vert{};
-					vert.SetPosition(key0.pos);
-					vert.SetNormal(DirectX::XMLoadFloat3A(&key0.norm));
-					vert.SetColor(DirectX::XMFLOAT4A(1.0f, 1.0f, 1.0f, 1.0f));
-					vert.SetUV(DirectX::XMLoadFloat2A(&key0.uv));
+					vert.pos = key0.pos;
+					vert.normal = key0.norm;
+					vert.color = DirectX::XMFLOAT4A(1.0f, 1.0f, 1.0f, 1.0f);
+					vert.uv = key0.uv;
 					vertices.push_back(vert);
 					idx0 = static_cast<uint32_t>(vertices.size() - 1);
 					uniqueVerts[key0] = idx0;
@@ -113,10 +113,10 @@ Mesh MeshLoader::LoadFromOBJ(const std::string& path, ID3D11Device* device) {
 				uint32_t idx1;
 				if (it1 == uniqueVerts.end()) {
 					Vertex vert{};
-					vert.SetPosition(key1.pos);
-					vert.SetNormal(DirectX::XMLoadFloat3A(&key1.norm));
-					vert.SetColor(DirectX::XMFLOAT4A(1.0f, 1.0f, 1.0f, 1.0f));
-					vert.SetUV(DirectX::XMLoadFloat2A(&key1.uv));
+					vert.pos = key1.pos;
+					vert.normal = key1.norm;
+					vert.color = DirectX::XMFLOAT4A(1.0f, 1.0f, 1.0f, 1.0f);
+					vert.uv = key1.uv;
 					vertices.push_back(vert);
 					idx1 = static_cast<uint32_t>(vertices.size() - 1);
 					uniqueVerts[key1] = idx1;
@@ -135,10 +135,10 @@ Mesh MeshLoader::LoadFromOBJ(const std::string& path, ID3D11Device* device) {
 				uint32_t idx2;
 				if (it2 == uniqueVerts.end()) {
 					Vertex vert{};
-					vert.SetPosition(key2.pos);
-					vert.SetNormal(DirectX::XMLoadFloat3A(&key2.norm));
-					vert.SetColor(DirectX::XMFLOAT4A(1.0f, 1.0f, 1.0f, 1.0f));
-					vert.SetUV(DirectX::XMLoadFloat2A(&key2.uv));
+					vert.pos = key2.pos;
+					vert.normal = key2.norm;
+					vert.color = DirectX::XMFLOAT4A(1.0f, 1.0f, 1.0f, 1.0f);
+					vert.uv = key2.uv;
 					vertices.push_back(vert);
 					idx2 = static_cast<uint32_t>(vertices.size() - 1);
 					uniqueVerts[key2] = idx2;

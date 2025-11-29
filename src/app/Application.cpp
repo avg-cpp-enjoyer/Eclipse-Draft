@@ -1,6 +1,6 @@
 #include "Application.hpp"
-#include <engine/GraphicsDevice.hpp>
-#include <thread>
+
+#include <engine/core/GraphicsDevice.hpp>
 
 int Application::Initialize(int width, int height) {
 	if (!m_mainWindow.Create(L"Eclipse Draft", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 

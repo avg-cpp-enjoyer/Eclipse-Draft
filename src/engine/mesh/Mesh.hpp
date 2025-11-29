@@ -1,12 +1,10 @@
 #pragma once
 
+#include "Vertex.hpp"
+
 #include <vector>
 #include <d3d11.h>
 #include <wrl/client.h>
-
-#include "Vertex.hpp"
-#include "GraphicsDevice.hpp"
-#include "utils/Direct3D11Utils.hpp"
 
 class Mesh {
 public:

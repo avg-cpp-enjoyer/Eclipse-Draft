@@ -1,5 +1,11 @@
 #include "Mesh.hpp"
 
+#include <engine/core/GraphicsDevice.hpp>
+#include <utils/Direct3D11Utils.hpp>
+#include <engine/graphics/ShaderProgram.hpp>
+#include <engine/graphics/VertexShader.hpp>
+#include <engine/graphics/PixelShader.hpp>
+
 void Mesh::CreateBuffers(ID3D11Device* device) {
 	D3D11_BUFFER_DESC vbd{};
 	vbd.Usage = D3D11_USAGE_DEFAULT;
@@ -30,12 +36,12 @@ void Mesh::Draw(ID3D11DeviceContext* context) const {
 	uint32_t stride = sizeof(Vertex);
 	uint32_t offset = 0;
 
+	ShaderProgram::GetShaderByName<VertexShader>(L"VertexShader.hlsl")->Bind(context);
+	ShaderProgram::GetShaderByName<PixelShader>(L"PixelShader.hlsl")->Bind(context);
+
 	context->RSSetState(GraphicsDevice::GridRasterizerState());
 	context->OMSetDepthStencilState(nullptr, 0);
 	context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
-	context->IASetInputLayout(GraphicsDevice::InputLayout());
-	context->VSSetShader(GraphicsDevice::VertexShader(), nullptr, 0);
-	context->PSSetShader(GraphicsDevice::PixelShader(), nullptr, 0);
 	context->UpdateSubresource(GraphicsDevice::TransformBufferPtr(), 0, nullptr, &transformBuffer, 0, 0);
 	context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

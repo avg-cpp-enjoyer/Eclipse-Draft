@@ -1,16 +1,19 @@
 #include "Vertex.hpp"
 
-Vertex::Vertex() : m_pos(0.0f, 0.0f, 0.0f), m_normal(0.0f, 0.0f, 0.0f), m_uv(0.0f, 0.0f) {}
+#include <DirectXMathConvert.inl>
+#include <DirectXMathVector.inl>
+
+Vertex::Vertex() : pos(0.0f, 0.0f, 0.0f), normal(0.0f, 0.0f, 0.0f), uv(0.0f, 0.0f) {}
 
 Vertex::Vertex(DirectX::XMFLOAT3A pos, DirectX::XMFLOAT3A normal, DirectX::XMFLOAT2A uv, DirectX::XMFLOAT4A color)
-	: m_pos(pos), m_normal(normal), m_uv(uv), m_color(color)
+	: pos(pos), normal(normal), uv(uv), color(color)
 {}
 
 Vertex::Vertex(DirectX::XMVECTOR pos, DirectX::XMVECTOR normal, DirectX::XMVECTOR uv, DirectX::XMVECTOR color) {
-	XMStoreFloat3A(&m_pos, pos);
-	XMStoreFloat3A(&m_normal, normal);
-	XMStoreFloat2A(&m_uv, uv);
-	XMStoreFloat4A(&m_color, color);
+	DirectX::XMStoreFloat3A(&this->pos, pos);
+	DirectX::XMStoreFloat3A(&this->normal, normal);
+	DirectX::XMStoreFloat2A(&this->uv, uv);
+	DirectX::XMStoreFloat4A(&this->color, color);
 }
 
 Vertex& Vertex::operator*=(const DirectX::XMMATRIX& matrix) {
@@ -35,57 +38,33 @@ Vertex& Vertex::TransformNormal(const DirectX::XMMATRIX& matrix) {
 }
 
 DirectX::XMVECTOR Vertex::PositionVec() const noexcept {
-	return XMLoadFloat3A(&m_pos);
+	return XMLoadFloat3A(&pos);
 }
 
 DirectX::XMVECTOR Vertex::NormalVec() const noexcept {
-	return XMLoadFloat3A(&m_normal);
+	return XMLoadFloat3A(&normal);
 }
 
 DirectX::XMVECTOR Vertex::UVVec() const noexcept {
-	return XMLoadFloat2A(&m_uv);
+	return XMLoadFloat2A(&uv);
 }
 
 DirectX::XMVECTOR Vertex::ColorVec() const noexcept {
-	return XMLoadFloat4A(&m_color);
-}
-
-const DirectX::XMFLOAT2A& Vertex::UV() const noexcept {
-	return m_uv;
-}
-
-const DirectX::XMFLOAT4A& Vertex::Color() const noexcept {
-	return m_color;
+	return XMLoadFloat4A(&color);
 }
 
 void Vertex::SetPosition(DirectX::XMVECTOR vec) noexcept {
-	XMStoreFloat3A(&m_pos, vec);
-}
-
-void Vertex::SetPosition(DirectX::XMFLOAT3A pos) noexcept {
-	m_pos = pos;
+	XMStoreFloat3A(&pos, vec);
 }
 
 void Vertex::SetNormal(DirectX::XMVECTOR vec) noexcept {
-	XMStoreFloat3A(&m_normal, vec);
-}
-
-void Vertex::SetNormal(DirectX::XMFLOAT3A normal) noexcept {
-	m_normal = normal;
+	XMStoreFloat3A(&normal, vec);
 }
 
 void Vertex::SetUV(DirectX::XMVECTOR vec) noexcept {
-	XMStoreFloat2A(&m_uv, vec);
-}
-
-void Vertex::SetUV(const DirectX::XMFLOAT2A& uv) noexcept {
-	m_uv = uv;
+	XMStoreFloat2A(&uv, vec);
 }
 
 void Vertex::SetColor(DirectX::XMVECTOR vec) noexcept {
-	XMStoreFloat4A(&m_color, vec);
-}
-
-void Vertex::SetColor(const DirectX::XMFLOAT4A& color) noexcept {
-	m_color = color;
+	XMStoreFloat4A(&color, vec);
 }

@@ -1,5 +1,11 @@
 ﻿#include "GraphicsDevice.hpp"
 
+#include <engine/graphics/IShader.hpp>
+#include <engine/graphics/ShaderProgram.hpp>
+#include <engine/graphics/VertexShader.hpp>
+#include <engine/graphics/PixelShader.hpp>
+#include <memory>
+
 RenderJob::RenderJob(RenderJob&& other) noexcept {
 	commandList        = other.commandList; 
 	swapChain          = other.swapChain; 
@@ -189,30 +195,17 @@ void GraphicsDevice::InitD3D11Device() {
 }
 
 void GraphicsDevice::InitShaders() {
-	Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
-	Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
-	Microsoft::WRL::ComPtr<ID3DBlob> gridPsBlob;
-	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
+	std::unique_ptr<IShader> vertexShader = std::make_unique<VertexShader>();
+	vertexShader->CompileFromFile(m_device.Get(), L"src\\shaders\\VertexShader.hlsl", "VSMain");
+	ShaderProgram::AddShader(std::move(vertexShader));
 
-	HR_LOG(D3DCompileFromFile(L"src\\shaders\\VertexShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0",
-		D3DCOMPILE_ENABLE_STRICTNESS, 0, &vsBlob, &errorBlob));
-	HR_LOG(D3DCompileFromFile(L"src\\shaders\\PixelShader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0",
-		D3DCOMPILE_ENABLE_STRICTNESS, 0, &psBlob, &errorBlob));
-	HR_LOG(D3DCompileFromFile(L"src\\shaders\\Grid.hlsl", nullptr, nullptr, "PSMain", "ps_5_0",
-		D3DCOMPILE_ENABLE_STRICTNESS, 0, &gridPsBlob, &errorBlob));
+	std::unique_ptr<IShader> pixelShader = std::make_unique<PixelShader>();
+	pixelShader->CompileFromFile(m_device.Get(), L"src\\shaders\\PixelShader.hlsl", "PSMain");
+	ShaderProgram::AddShader(std::move(pixelShader));
 
-	HR_LOG(m_device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_vertexShader));
-	HR_LOG(m_device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_pixelShader));
-	HR_LOG(m_device->CreatePixelShader(gridPsBlob->GetBufferPointer(), gridPsBlob->GetBufferSize(), nullptr, &m_gridShader));
-
-	D3D11_INPUT_ELEMENT_DESC layout[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	HR_LOG(m_device->CreateInputLayout(layout, _countof(layout), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &m_inputLayout));
+	std::unique_ptr<IShader> gridShader = std::make_unique<PixelShader>();
+	gridShader->CompileFromFile(m_device.Get(), L"src\\shaders\\Grid.hlsl", "PSMain");
+	ShaderProgram::AddShader(std::move(gridShader));
 }
 
 void GraphicsDevice::InitBuffers() {
@@ -293,18 +286,6 @@ ID3D11Buffer* GraphicsDevice::TransformBufferPtr() {
 	return Instance().m_transformBuffer.Get();
 }
 
-ID3D11VertexShader* GraphicsDevice::VertexShader() {
-	return Instance().m_vertexShader.Get();
-}
-
-ID3D11PixelShader* GraphicsDevice::PixelShader() {
-	return Instance().m_pixelShader.Get();
-}
-
-ID3D11InputLayout* GraphicsDevice::InputLayout() {
-	return Instance().m_inputLayout.Get();
-}
-
 ID3D11BlendState* GraphicsDevice::GridBlendState() {
 	return Instance().m_bsGrid.Get();
 }
@@ -327,10 +308,6 @@ ID3D11Buffer* GraphicsDevice::GridParamsBuffer() {
 
 GridParams& GraphicsDevice::GridParamsData() {
 	return Instance().m_gridParams;
-}
-
-ID3D11PixelShader* GraphicsDevice::GridShader() {
-	return Instance().m_gridShader.Get();
 }
 
 ID3D11Buffer* GraphicsDevice::CameraParamsBuffer() {

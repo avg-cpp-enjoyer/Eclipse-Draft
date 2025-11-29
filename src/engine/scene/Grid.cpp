@@ -1,5 +1,16 @@
 #include "Grid.hpp"
 
+#include <engine/core/GraphicsDevice.hpp>
+#include <engine/mesh/Vertex.hpp>
+#include <utils/Direct3D11Utils.hpp>
+#include <cstdint>
+#include <d3dcommon.h>
+#include <dxgiformat.h>
+
+#include <engine/graphics/ShaderProgram.hpp>
+#include <engine/graphics/VertexShader.hpp>
+#include <engine/graphics/PixelShader.hpp>
+
 void Grid::Draw(ID3D11DeviceContext* context) const {
 	TransformBuffer transformBuffer{};
 	transformBuffer.world = Direct3D11Utils::SetWorldMatrix(m_position, m_rotation, m_scale);
@@ -13,12 +24,12 @@ void Grid::Draw(ID3D11DeviceContext* context) const {
 	ID3D11Buffer* camBuf = GraphicsDevice::CameraParamsBuffer();
 	__m128 blendFactor = _mm_set_ps(0.0f, 0.0f, 0.0f, 0.0f);
 
+	ShaderProgram::GetShaderByName<VertexShader>(L"VertexShader.hlsl")->Bind(context);
+	ShaderProgram::GetShaderByName<PixelShader>(L"Grid.hlsl")->Bind(context);
+
 	context->OMSetDepthStencilState(GraphicsDevice::GridDepthStencilState(), 0);
 	context->OMSetBlendState(GraphicsDevice::GridBlendState(), reinterpret_cast<const float*>(&blendFactor), 0xFFFFFFFF);
 	context->RSSetState(GraphicsDevice::GridRasterizerState());
-	context->VSSetShader(GraphicsDevice::VertexShader(), nullptr, 0);
-	context->PSSetShader(GraphicsDevice::GridShader(), nullptr, 0);
-	context->IASetInputLayout(GraphicsDevice::InputLayout());
 	context->UpdateSubresource(GraphicsDevice::TransformBufferPtr(), 0, nullptr, &transformBuffer, 0, 0);
 	context->VSSetConstantBuffers(0, 1, GraphicsDevice::TransformBufferAddr());
 	context->UpdateSubresource(GraphicsDevice::GridParamsBuffer(), 0, nullptr, &GraphicsDevice::GridParamsData(), 0, 0);

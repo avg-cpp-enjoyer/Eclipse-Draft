@@ -1,6 +1,22 @@
 ﻿#include "Renderer.hpp"
+#include "GraphicsDevice.hpp"
+#include "RenderTarget.hpp"
 
-Renderer::Renderer(HWND window) : m_window(window), m_renderTarget(window) {}
+#include <cstdarg>
+#include <thread>
+#include <Windows.h>
+#include <mutex>
+#include <engine/mesh/MeshLoader.hpp>
+#include <engine/mesh/Mesh.hpp>
+
+Renderer::Renderer(HWND window) : m_window(window), m_renderTarget(window) {
+	m_testMesh = MeshLoader::LoadFromOBJ("assets\\M4A1.obj", GraphicsDevice::D3D11Device());
+	m_testMesh.SetScale({ 0.2f, 0.2f, 0.2f });
+	Mesh grid = MeshLoader::LoadFromOBJ("assets\\grid.obj", GraphicsDevice::D3D11Device());
+	m_grid.SetVertices(grid.Vertices());
+	m_grid.SetIndices(grid.Indices());
+	m_grid.CreateBuffers(GraphicsDevice::D3D11Device());
+}
 
 void Renderer::Start(int threadPriority, uintptr_t affinityMask) {
 	if (!m_running.exchange(true)) {
@@ -34,16 +50,7 @@ void Renderer::RenderLoop() {
 	}
 }
 
-MainRenderer::MainRenderer(HWND window) : Renderer(window) {
-	m_testMesh = MeshLoader::LoadFromOBJ("assets\\M4A1.obj", GraphicsDevice::D3D11Device());
-	m_testMesh.SetScale({ 0.2f, 0.2f, 0.2f });
-	Mesh grid = MeshLoader::LoadFromOBJ("assets\\grid.obj", GraphicsDevice::D3D11Device());
-	m_grid.SetVertices(grid.Vertices());
-	m_grid.SetIndices(grid.Indices());
-	m_grid.CreateBuffers(GraphicsDevice::D3D11Device());
-}
-
-void MainRenderer::RenderFrame() {
+void Renderer::RenderFrame() {
 	m_renderTarget.BeginRender();
 	m_grid.Draw(m_renderTarget.Context());
 	m_testMesh.Draw(m_renderTarget.Context());

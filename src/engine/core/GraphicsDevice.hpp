@@ -88,16 +88,12 @@ public:
 	static ID3D11Buffer** LightBufferAddr();
 	static ID3D11Buffer** TransformBufferAddr();
 	static ID3D11Buffer* TransformBufferPtr();
-	static ID3D11VertexShader* VertexShader();
-	static ID3D11PixelShader* PixelShader();
-	static ID3D11InputLayout* InputLayout();
 	static ID3D11BlendState* GridBlendState();
 	static ID3D11RasterizerState* GridRasterizerState();
 	static ID3D11DepthStencilState* GridDepthStencilState();
 	static void SetGridParams(const GridParams& params);
 	static ID3D11Buffer* GridParamsBuffer();
 	static GridParams& GridParamsData();
-	static ID3D11PixelShader* GridShader();
 	static ID3D11Buffer* CameraParamsBuffer();
 private:
 	GraphicsDevice() = default;
@@ -116,14 +112,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Device>             m_device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext>      m_immediateContext;
 	Microsoft::WRL::ComPtr<IDXGIFactory6>            m_dxgiFactory;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>       m_vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>        m_pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>        m_inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_transformBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_lightBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_gridParamsBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_cameraParamsBuffer;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>        m_gridShader;
 	Microsoft::WRL::ComPtr<ID3D11BlendState>         m_bsGrid;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState>    m_rsGrid;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  m_dsGrid;
