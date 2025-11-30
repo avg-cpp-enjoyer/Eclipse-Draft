@@ -1,8 +1,6 @@
 #include "Grid.hpp"
 
-#include <engine/core/GraphicsDevice.hpp>
-#include <engine/mesh/Vertex.hpp>
-#include <utils/Direct3D11Utils.hpp>
+#include <d3d11.h>
 #include <cstdint>
 #include <d3dcommon.h>
 #include <dxgiformat.h>
@@ -10,6 +8,10 @@
 #include <engine/graphics/ShaderProgram.hpp>
 #include <engine/graphics/VertexShader.hpp>
 #include <engine/graphics/PixelShader.hpp>
+#include <engine/graphics/PipelineStateManager.hpp>
+#include <engine/core/GraphicsDevice.hpp>
+#include <engine/mesh/Vertex.hpp>
+#include <utils/Direct3D11Utils.hpp>
 
 void Grid::Draw(ID3D11DeviceContext* context) const {
 	TransformBuffer transformBuffer{};
@@ -27,14 +29,17 @@ void Grid::Draw(ID3D11DeviceContext* context) const {
 	ShaderProgram::GetShaderByName<VertexShader>(L"VertexShader.hlsl")->Bind(context);
 	ShaderProgram::GetShaderByName<PixelShader>(L"Grid.hlsl")->Bind(context);
 
-	context->OMSetDepthStencilState(GraphicsDevice::GridDepthStencilState(), 0);
-	context->OMSetBlendState(GraphicsDevice::GridBlendState(), reinterpret_cast<const float*>(&blendFactor), 0xFFFFFFFF);
-	context->RSSetState(GraphicsDevice::GridRasterizerState());
+	const PipelineState& state = PipelineStateManager::Get(PipelineMode::TransparentAlpha);
+	context->RSSetState(state.rasterizer);
+	context->OMSetBlendState(state.blend, reinterpret_cast<const float*>(&blendFactor), 0xFFFFFFFF);
+	context->OMSetDepthStencilState(state.depthStencil, 0);
+
 	context->UpdateSubresource(GraphicsDevice::TransformBufferPtr(), 0, nullptr, &transformBuffer, 0, 0);
 	context->VSSetConstantBuffers(0, 1, GraphicsDevice::TransformBufferAddr());
 	context->UpdateSubresource(GraphicsDevice::GridParamsBuffer(), 0, nullptr, &GraphicsDevice::GridParamsData(), 0, 0);
 	context->PSSetConstantBuffers(2, 1, &gridParamsBuf);
 	context->PSSetConstantBuffers(3, 1, &camBuf);
+
 	context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

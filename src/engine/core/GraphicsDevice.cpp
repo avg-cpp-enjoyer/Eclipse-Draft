@@ -4,7 +4,9 @@
 #include <engine/graphics/ShaderProgram.hpp>
 #include <engine/graphics/VertexShader.hpp>
 #include <engine/graphics/PixelShader.hpp>
+#include <engine/graphics/PipelineStateManager.hpp>
 #include <memory>
+#include <format>
 
 RenderJob::RenderJob(RenderJob&& other) noexcept {
 	commandList        = other.commandList; 
@@ -37,7 +39,7 @@ void GraphicsDevice::Initialize() {
 	Instance().SetGridParams({ 0.5f, 0.02f, 5.0f, 0.05f, 0.5f, {0.8f, 0.8f, 0.8f},  
 		{0.6f, 0.6f, 0.6f}, {0.0f, 0.5f, 1.0f}, {1.0f, 0.0f, 0.0f}, 0.3f, 50.0f });
 	Instance().InitBuffers();
-	Instance().EnableGridAlphaBlending();
+	PipelineStateManager::Initialize(Instance().m_device.Get());
 #ifdef _DEBUG
 	Instance().EnableD3D11DebugLayer();
 	Instance().EnableDXGIDebugLayer();
@@ -238,34 +240,6 @@ void GraphicsDevice::InitBuffers() {
 	HR_LOG(m_device->CreateBuffer(&camDesc, nullptr, &m_cameraParamsBuffer));
 }
 
-void GraphicsDevice::EnableGridAlphaBlending() {
-	D3D11_DEPTH_STENCIL_DESC depthStencil{};
-	depthStencil.DepthEnable = TRUE;
-	depthStencil.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthStencil.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-	D3D11_BLEND_DESC blend{};
-	blend.RenderTarget[0].BlendEnable            = TRUE;
-	blend.RenderTarget[0].SrcBlend               = D3D11_BLEND_SRC_ALPHA;
-	blend.RenderTarget[0].DestBlend              = D3D11_BLEND_INV_SRC_ALPHA;
-	blend.RenderTarget[0].BlendOp                = D3D11_BLEND_OP_ADD;
-	blend.RenderTarget[0].SrcBlendAlpha          = D3D11_BLEND_ONE;
-	blend.RenderTarget[0].DestBlendAlpha         = D3D11_BLEND_ZERO;
-	blend.RenderTarget[0].BlendOpAlpha           = D3D11_BLEND_OP_ADD;
-	blend.RenderTarget[0].RenderTargetWriteMask  = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	D3D11_RASTERIZER_DESC rasterizer{};
-	rasterizer.FillMode                          = D3D11_FILL_SOLID;
-	rasterizer.CullMode                          = D3D11_CULL_BACK;
-	rasterizer.DepthClipEnable                   = TRUE;
-	rasterizer.DepthBias                         = 0;
-	rasterizer.SlopeScaledDepthBias              = 0.0f;
-
-	HR_LOG(m_device->CreateDepthStencilState(&depthStencil, &m_dsGrid));
-	HR_LOG(m_device->CreateBlendState(&blend, &m_bsGrid));
-	HR_LOG(m_device->CreateRasterizerState(&rasterizer, &m_rsGrid));
-}
-
 void GraphicsDevice::SetLightBuffer(const LightBuffer& buffer) {
 	Instance().m_lightBufferData = buffer;
 }
@@ -285,17 +259,6 @@ ID3D11Buffer** GraphicsDevice::TransformBufferAddr() {
 ID3D11Buffer* GraphicsDevice::TransformBufferPtr() {
 	return Instance().m_transformBuffer.Get();
 }
-
-ID3D11BlendState* GraphicsDevice::GridBlendState() {
-	return Instance().m_bsGrid.Get();
-}
-
-ID3D11RasterizerState* GraphicsDevice::GridRasterizerState() {
-	return Instance().m_rsGrid.Get();
-}
-
-ID3D11DepthStencilState* GraphicsDevice::GridDepthStencilState() {
-	return Instance().m_dsGrid.Get();
 }
 
 void GraphicsDevice::SetGridParams(const GridParams& params) {

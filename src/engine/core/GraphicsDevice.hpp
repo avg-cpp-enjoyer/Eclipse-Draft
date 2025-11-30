@@ -7,11 +7,8 @@
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
 #include <wrl/client.h>
-#include <d3dcompiler.h>
 #include <unordered_map>
 #include <mutex>
-#include <format>
-#include <cstdint>
 
 #ifdef _DEBUG
 #include <dxgidebug.h>
@@ -88,9 +85,6 @@ public:
 	static ID3D11Buffer** LightBufferAddr();
 	static ID3D11Buffer** TransformBufferAddr();
 	static ID3D11Buffer* TransformBufferPtr();
-	static ID3D11BlendState* GridBlendState();
-	static ID3D11RasterizerState* GridRasterizerState();
-	static ID3D11DepthStencilState* GridDepthStencilState();
 	static void SetGridParams(const GridParams& params);
 	static ID3D11Buffer* GridParamsBuffer();
 	static GridParams& GridParamsData();
@@ -107,7 +101,6 @@ private:
 	void InitD3D11Device();
 	void InitShaders();
 	void InitBuffers();
-	void EnableGridAlphaBlending();
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device>             m_device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext>      m_immediateContext;
@@ -116,9 +109,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_lightBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_gridParamsBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_cameraParamsBuffer;
-	Microsoft::WRL::ComPtr<ID3D11BlendState>         m_bsGrid;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>    m_rsGrid;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  m_dsGrid;
 #ifdef _DEBUG									     
 	Microsoft::WRL::ComPtr<IDXGIDebug1>              m_dxgiDebug;
 	Microsoft::WRL::ComPtr<ID3D11Debug>              m_d3d11Debug;

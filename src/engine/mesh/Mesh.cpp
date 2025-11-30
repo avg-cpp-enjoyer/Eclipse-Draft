@@ -5,6 +5,13 @@
 #include <engine/graphics/ShaderProgram.hpp>
 #include <engine/graphics/VertexShader.hpp>
 #include <engine/graphics/PixelShader.hpp>
+#include <engine/graphics/PipelineStateManager.hpp>
+#include <utils/Log.hpp>
+
+#include <d3d11.h>
+#include <cstdint>
+#include <dxgiformat.h>
+#include <d3dcommon.h>
 
 void Mesh::CreateBuffers(ID3D11Device* device) {
 	D3D11_BUFFER_DESC vbd{};
@@ -38,6 +45,12 @@ void Mesh::Draw(ID3D11DeviceContext* context) const {
 
 	ShaderProgram::GetShaderByName<VertexShader>(L"VertexShader.hlsl")->Bind(context);
 	ShaderProgram::GetShaderByName<PixelShader>(L"PixelShader.hlsl")->Bind(context);
+
+	//TODO: const PipelineState& state = PipelineStateManager::Get(m_material->Mode());
+	const PipelineState& state = PipelineStateManager::Get(PipelineMode::OpaqueSolid);
+	context->RSSetState(state.rasterizer);
+	context->OMSetBlendState(state.blend, nullptr, 0xFFFFFFFF);
+	context->OMSetDepthStencilState(state.depthStencil, 0);
 
 	context->RSSetState(GraphicsDevice::GridRasterizerState());
 	context->OMSetDepthStencilState(nullptr, 0);
