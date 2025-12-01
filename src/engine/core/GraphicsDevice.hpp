@@ -47,31 +47,12 @@ __declspec(align(16)) struct CameraParams {
 	float pad;
 };
 
-struct RenderJob {
-	RenderJob() = default;
-	~RenderJob();
-
-	RenderJob(const RenderJob&) = delete;
-	RenderJob& operator=(const RenderJob&) = delete;
-	RenderJob(RenderJob&& other) noexcept;
-	RenderJob& operator=(RenderJob&& other) noexcept;
-
-	ID3D11CommandList* commandList = nullptr;
-	IDXGISwapChain* swapChain = nullptr;
-};
-
 class GraphicsDevice {
 public:
 	GraphicsDevice(const GraphicsDevice&) = delete;
 	GraphicsDevice& operator=(const GraphicsDevice&) = delete;
 
 	static void Initialize();
-	static void PushRenderJob(HWND window, RenderJob renderJob);
-	static void ExecuteRenderJobs();
-	static void RemoveRenderJob(HWND window);
-	static std::unordered_map<HWND, RenderJob>& PendingJobs();
-	static std::mutex& Mutex();
-	static std::condition_variable& CV();
 	static IDXGIFactory6* DXGIFactory();
 	static ID3D11DeviceContext* ImmediateContext();
 	static ID3D11Device* D3D11Device();
@@ -113,10 +94,6 @@ private:
 	Microsoft::WRL::ComPtr<IDXGIDebug1>              m_dxgiDebug;
 	Microsoft::WRL::ComPtr<ID3D11Debug>              m_d3d11Debug;
 #endif											     
-	std::unordered_map<HWND, RenderJob>              m_pendingJobs;
-	std::unordered_map<HWND, RenderJob>              m_activeJobs;
-	std::condition_variable                          m_renderCV;
-	std::mutex                                       m_renderMutex;
 	DirectX::XMMATRIX                                m_viewMatrix{};
 	DirectX::XMMATRIX                                m_projMatrix{};
 	LightBuffer                                      m_lightBufferData{};

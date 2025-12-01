@@ -8,18 +8,18 @@ void PipelineStateManager::Initialize(ID3D11Device* device) {
 	rsSolid.FillMode = D3D11_FILL_SOLID;
 	rsSolid.CullMode = D3D11_CULL_BACK;
 	rsSolid.DepthClipEnable = true;
-	device->CreateRasterizerState(&rsSolid, m_rsSolid.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateRasterizerState(&rsSolid, m_rsSolid.ReleaseAndGetAddressOf()));
 
 	D3D11_RASTERIZER_DESC rsWire{};
 	rsWire.FillMode = D3D11_FILL_WIREFRAME;
 	rsWire.CullMode = D3D11_CULL_NONE;
 	rsWire.DepthClipEnable = true;
-	device->CreateRasterizerState(&rsWire, m_rsWire.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateRasterizerState(&rsWire, m_rsWire.ReleaseAndGetAddressOf()));
 
 	D3D11_BLEND_DESC blendOpaque{};
 	blendOpaque.RenderTarget[0].BlendEnable = false;
 	blendOpaque.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	device->CreateBlendState(&blendOpaque, m_blendOpaque.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateBlendState(&blendOpaque, m_blendOpaque.ReleaseAndGetAddressOf()));
 
 	D3D11_BLEND_DESC blendAlpha{};
 	blendAlpha.RenderTarget[0].BlendEnable = true;
@@ -30,7 +30,7 @@ void PipelineStateManager::Initialize(ID3D11Device* device) {
 	blendAlpha.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendAlpha.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendAlpha.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	device->CreateBlendState(&blendAlpha, m_blendAlpha.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateBlendState(&blendAlpha, m_blendAlpha.ReleaseAndGetAddressOf()));
 
 	D3D11_BLEND_DESC blendAdd{};
 	blendAdd.RenderTarget[0].BlendEnable = true;
@@ -41,29 +41,28 @@ void PipelineStateManager::Initialize(ID3D11Device* device) {
 	blendAdd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendAdd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendAdd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	device->CreateBlendState(&blendAdd, m_blendAdd.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateBlendState(&blendAdd, m_blendAdd.ReleaseAndGetAddressOf()));
 
 	D3D11_DEPTH_STENCIL_DESC dsDefault{};
 	dsDefault.DepthEnable = true;
 	dsDefault.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dsDefault.DepthFunc = D3D11_COMPARISON_LESS;
-	device->CreateDepthStencilState(&dsDefault, m_depthDefault.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateDepthStencilState(&dsDefault, m_depthDefault.ReleaseAndGetAddressOf()));
 
 	D3D11_DEPTH_STENCIL_DESC dsRead{};
 	dsRead.DepthEnable = true;
 	dsRead.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	dsRead.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	device->CreateDepthStencilState(&dsRead, m_depthRead.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateDepthStencilState(&dsRead, m_depthRead.ReleaseAndGetAddressOf()));
 
 	D3D11_DEPTH_STENCIL_DESC dsNone{};
 	dsNone.DepthEnable = false;
-	device->CreateDepthStencilState(&dsNone, m_depthNone.ReleaseAndGetAddressOf());
+	HR_LOG(device->CreateDepthStencilState(&dsNone, m_depthNone.ReleaseAndGetAddressOf()));
 
 	m_states[PipelineMode::OpaqueSolid]       = { m_rsSolid.Get(), m_blendOpaque.Get(), m_depthDefault.Get() };
 	m_states[PipelineMode::TransparentAlpha]  = { m_rsSolid.Get(), m_blendAlpha.Get(),  m_depthRead.Get() };
 	m_states[PipelineMode::AdditiveParticles] = { m_rsSolid.Get(), m_blendAdd.Get(),    m_depthNone.Get() };
-	m_states[PipelineMode::WireframeDebug]    = { m_rsWire.Get(),  m_blendOpaque.Get(), m_depthDefault.Get() };
-	m_states[PipelineMode::UIOverlay]         = { m_rsSolid.Get(), m_blendAlpha.Get(),  m_depthNone.Get() };
+	m_states[PipelineMode::Wireframe]         = { m_rsWire.Get(),  m_blendOpaque.Get(), m_depthDefault.Get() };
 	m_states[PipelineMode::DepthOnlyPass]     = { m_rsSolid.Get(), m_blendOpaque.Get(), m_depthDefault.Get() };
 	m_states[PipelineMode::ShadowPass]        = { m_rsSolid.Get(), m_blendOpaque.Get(), m_depthDefault.Get() };
 }

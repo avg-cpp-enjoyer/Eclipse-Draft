@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include <engine/core/GraphicsDevice.hpp>
+#include <engine/core/RenderQueue.hpp>
 
 int Application::Initialize(int width, int height) {
 	if (!m_mainWindow.Create(L"Eclipse Draft", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
@@ -15,7 +16,7 @@ int Application::Exec(int cmdShow) {
 
 	MSG msg{};
 	while (msg.message != WM_QUIT) {
-		GraphicsDevice::ExecuteRenderJobs();
+		RenderQueue::Execute(GraphicsDevice::ImmediateContext());
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

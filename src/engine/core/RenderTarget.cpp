@@ -1,5 +1,7 @@
 ﻿#include "RenderTarget.hpp"
 
+#include <engine/core/RenderQueue.hpp>
+
 RenderTarget::RenderTarget(HWND window) : m_window(window) {
 	RECT windowRect{};
 	GetClientRect(m_window, &windowRect);
@@ -42,7 +44,7 @@ void RenderTarget::HandleResize() {
 	m_rtv.Reset();
 	m_deferredContext->Flush();
 
-	GraphicsDevice::RemoveRenderJob(m_window);
+	RenderQueue::Remove(m_window);
 	GraphicsDevice::ImmediateContext()->OMSetRenderTargets(0, nullptr, nullptr);
 	GraphicsDevice::ImmediateContext()->ClearState();
 	GraphicsDevice::ImmediateContext()->Flush();
@@ -94,7 +96,7 @@ void RenderTarget::EndRender() {
 	job.commandList->AddRef();
 	job.swapChain = m_swapChain.Get();
 
-	GraphicsDevice::PushRenderJob(m_window, std::move(job));
+	RenderQueue::Push(m_window, std::move(job));
 	m_cmdList.Reset();
 }
 

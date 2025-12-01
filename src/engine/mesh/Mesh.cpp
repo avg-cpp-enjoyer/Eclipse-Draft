@@ -52,9 +52,6 @@ void Mesh::Draw(ID3D11DeviceContext* context) const {
 	context->OMSetBlendState(state.blend, nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(state.depthStencil, 0);
 
-	context->RSSetState(GraphicsDevice::GridRasterizerState());
-	context->OMSetDepthStencilState(nullptr, 0);
-	context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 	context->UpdateSubresource(GraphicsDevice::TransformBufferPtr(), 0, nullptr, &transformBuffer, 0, 0);
 	context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

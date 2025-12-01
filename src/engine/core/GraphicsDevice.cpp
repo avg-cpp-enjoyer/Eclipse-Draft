@@ -8,29 +8,6 @@
 #include <memory>
 #include <format>
 
-RenderJob::RenderJob(RenderJob&& other) noexcept {
-	commandList        = other.commandList; 
-	swapChain          = other.swapChain; 
-	other.commandList  = nullptr;
-	other.swapChain    = nullptr;
-}
-
-RenderJob::~RenderJob() {
-	if (commandList) {
-		commandList->Release();
-	}
-}
-
-RenderJob& RenderJob::operator=(RenderJob&& other) noexcept {
-	if (this != &other) {
-		commandList        = other.commandList; 
-		swapChain          = other.swapChain;
-		other.commandList  = nullptr;
-		other.swapChain    = nullptr;
-	}
-	return *this;
-}
-
 void GraphicsDevice::Initialize() {
 	Instance().InitDXGIFactory();
 	Instance().InitD3D11Device();
@@ -56,48 +33,6 @@ ID3D11DeviceContext* GraphicsDevice::ImmediateContext() {
 
 ID3D11Device* GraphicsDevice::D3D11Device() {
 	return Instance().m_device.Get();
-}
-
-void GraphicsDevice::PushRenderJob(HWND window, RenderJob renderJob) {
-	std::lock_guard<std::mutex> lock(Mutex());
-	PendingJobs()[window] = std::move(renderJob);
-}
-
-void GraphicsDevice::ExecuteRenderJobs() {
-	auto& pendingJobs = Instance().m_pendingJobs;
-	auto& activeJobs = Instance().m_activeJobs;
-	{
-		std::lock_guard<std::mutex> lock(Mutex());
-		std::swap(activeJobs, pendingJobs);
-	}
-	for (auto& [hwnd, job] : activeJobs) {
-		Instance().m_immediateContext->ExecuteCommandList(job.commandList, FALSE);
-	}
-
-	for (auto& [hwnd, job] : activeJobs) {
-		job.swapChain->Present(1, 0);
-	}
-
-	activeJobs.clear();
-	CV().notify_all();
-}
-
-void GraphicsDevice::RemoveRenderJob(HWND window) {
-	std::lock_guard<std::mutex> lock(Mutex());
-	Instance().m_pendingJobs.erase(window);
-	Instance().m_activeJobs.erase(window);
-}
-
-std::unordered_map<HWND, RenderJob>& GraphicsDevice::PendingJobs() {
-	return Instance().m_pendingJobs;
-}
-
-std::mutex& GraphicsDevice::Mutex() {
-	return Instance().m_renderMutex;
-}
-
-std::condition_variable& GraphicsDevice::CV() {
-	return Instance().m_renderCV;
 }
 
 GraphicsDevice& GraphicsDevice::Instance() {
@@ -258,7 +193,6 @@ ID3D11Buffer** GraphicsDevice::TransformBufferAddr() {
 
 ID3D11Buffer* GraphicsDevice::TransformBufferPtr() {
 	return Instance().m_transformBuffer.Get();
-}
 }
 
 void GraphicsDevice::SetGridParams(const GridParams& params) {

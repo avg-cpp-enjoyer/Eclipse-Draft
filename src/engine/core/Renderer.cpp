@@ -2,12 +2,14 @@
 #include "GraphicsDevice.hpp"
 #include "RenderTarget.hpp"
 
+#include <engine/mesh/MeshLoader.hpp>
+#include <engine/mesh/Mesh.hpp>
+#include <engine/core/RenderQueue.hpp>
+
 #include <cstdarg>
 #include <thread>
 #include <Windows.h>
 #include <mutex>
-#include <engine/mesh/MeshLoader.hpp>
-#include <engine/mesh/Mesh.hpp>
 
 Renderer::Renderer(HWND window) : m_window(window), m_renderTarget(window) {
 	m_testMesh = MeshLoader::LoadFromOBJ("assets\\M4A1.obj", GraphicsDevice::D3D11Device());
@@ -31,7 +33,7 @@ void Renderer::Shutdown() {
 	if (m_renderThread.joinable()) {
 		m_renderThread.join();
 	}
-	GraphicsDevice::RemoveRenderJob(m_window);
+	RenderQueue::Remove(m_window);
 }
 
 RenderTarget& Renderer::GetRT() {
@@ -40,10 +42,10 @@ RenderTarget& Renderer::GetRT() {
 
 void Renderer::RenderLoop() {
 	while (m_running.load(std::memory_order_relaxed)) {
-		std::unique_lock<std::mutex> lock(GraphicsDevice::Mutex());
-		GraphicsDevice::CV().wait(lock, [&] { 
-			return !m_running.load(std::memory_order_relaxed) ||
-			GraphicsDevice::PendingJobs().count(m_window) == 0;
+		std::unique_lock<std::mutex> lock(RenderQueue::Mutex());
+		RenderQueue::CV().wait(lock, [&] { 
+			return !m_running.load(std::memory_order::relaxed) ||
+			RenderQueue::PendingJobs().count(m_window) == 0;
 		});
 		lock.unlock();
 		RenderFrame();
