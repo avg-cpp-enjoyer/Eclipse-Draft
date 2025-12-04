@@ -31,31 +31,41 @@ float aastep(float threshold, float x, float fw) {
    return smoothstep(threshold - fw, threshold + fw, x);
 }
 
+float ddLength(float a) {
+    return length(float2(ddx(a), ddy(a)));
+}
+
+float pristineGrid(float2 uv, float2 lineWidth) {
+    lineWidth = saturate(lineWidth);
+    float4 uvDDXY = float4(ddx(uv), ddy(uv));
+    float2 uvDeriv = float2(length(uvDDXY.xz), length(uvDDXY.yw));
+    bool2 invertLine = lineWidth > 0.5;
+    float2 targetWidth = invertLine ? 1.0 - lineWidth : lineWidth;
+    float2 drawWidth = clamp(targetWidth, uvDeriv, 0.5);
+    float2 lineAA = max(uvDeriv, 0.000001) * 1.5;
+    float2 gridUV = abs(frac(uv) * 2.0 - 1.0);
+    gridUV = invertLine ? gridUV : 1.0 - gridUV;
+    float2 grid2 = smoothstep(drawWidth + lineAA, drawWidth - lineAA, gridUV);
+    grid2 *= saturate(targetWidth / drawWidth);
+    grid2 = lerp(grid2, targetWidth, saturate(uvDeriv * 2.0 - 1.0));
+    grid2 = invertLine ? 1.0 - grid2 : grid2;
+    return lerp(grid2.x, 1.0, grid2.y);
+}
+
 float4 PSMain(VSOutput input) : SV_TARGET {
     float2 uv = input.worldPos.xz / cellSize;
-    float2 g = abs(frac(uv) - 0.5);
-    float lineDist = min(g.x, g.y);
-    float fw = fwidth(lineDist);
-    float lineMask = 1.0 - aastep(lineWidth * 0.5, lineDist, fw);
+    float lineMask = pristineGrid(uv, float2(lineWidth, lineWidth));
 
-    float2 uvMajor = uv / majorStep;
-    float2 gm = abs(frac(uvMajor) - 0.5);
-    float dm = min(gm.x, gm.y);
-    float fwMajor = fwidth(dm);
-    float majorMask = 1.0 - aastep(majorWidth * 0.5, dm, fwMajor);
-
-    float ax = 1.0 - aastep(axisWidth * 0.5, abs(input.worldPos.z) / cellSize, fwidth(input.worldPos.z / cellSize));
-    float az = 1.0 - aastep(axisWidth * 0.5, abs(input.worldPos.x) / cellSize, fwidth(input.worldPos.x / cellSize));
+    float ax = 1.0 - aastep(lineWidth, abs(input.worldPos.z) / cellSize, ddLength(input.worldPos.z / cellSize));
+    float az = 1.0 - aastep(lineWidth, abs(input.worldPos.x) / cellSize, ddLength(input.worldPos.x / cellSize));
 
     float3 col = gridColor;
-    col = lerp(col, majorColor, majorMask);
     col = lerp(col, axisXColor, ax);
     col = lerp(col, axisZColor, az);
 
-    float mask = max(max(lineMask, majorMask), max(ax, az));
     float dist = distance(input.worldPos, cameraPos);
     float fade = saturate(1.0 - dist / 50.0f);
-    float alpha = baseAlpha * saturate(mask) * fade;
+    float alpha = lineMask * baseAlpha * fade;
 
     return float4(col, alpha);
 }
