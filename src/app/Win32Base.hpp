@@ -2,7 +2,6 @@
 
 #include <Windows.h>
 #include <cstdint>
-#include <type_traits>
 
 template <typename T>
 class __declspec(novtable) Win32Base {
@@ -13,10 +12,12 @@ public:
 	Win32Base(const Win32Base&) = delete;
 	Win32Base& operator=(const Win32Base&) = delete;
 
-	bool Create(const wchar_t* windowName, uint32_t style, uint32_t exStyle = 0,
+	bool Create(
+		const wchar_t* windowName, uint32_t style, uint32_t exStyle = 0,
 		int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int width = CW_USEDEFAULT,
 		int height = CW_USEDEFAULT, HBRUSH bgBrush = nullptr, HWND parentWnd = nullptr,
-		HMENU menu = nullptr);
+		HMENU menu = nullptr
+	);
 
 	static intptr_t _stdcall WndProc(HWND window, uint32_t msg, uintptr_t wParam, intptr_t lParam);
 	HWND Window() const noexcept;

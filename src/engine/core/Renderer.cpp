@@ -3,21 +3,21 @@
 #include "RenderTarget.hpp"
 
 #include <engine/mesh/MeshLoader.hpp>
-#include <engine/mesh/Mesh.hpp>
+#include <engine/mesh/StaticMesh.hpp>
 #include <engine/core/RenderQueue.hpp>
+#include <engine/mesh/IMesh.hpp>
 
 #include <cstdarg>
 #include <thread>
 #include <Windows.h>
 #include <mutex>
+#include <memory>
+#include <utility>
 
 Renderer::Renderer(HWND window) : m_window(window), m_renderTarget(window) {
-	m_testMesh = MeshLoader::LoadFromOBJ("assets\\M4A1.obj", GraphicsDevice::D3D11Device());
-	m_testMesh.SetScale({ 0.2f, 0.2f, 0.2f });
-	Mesh grid = MeshLoader::LoadFromOBJ("assets\\grid.obj", GraphicsDevice::D3D11Device());
-	m_grid.SetVertices(grid.Vertices());
-	m_grid.SetIndices(grid.Indices());
-	m_grid.CreateBuffers(GraphicsDevice::D3D11Device());
+	std::unique_ptr<IMesh> testMesh = std::make_unique<StaticMesh>(MeshLoader::LoadFromOBJ("assets\\M4A1.obj", GraphicsDevice::D3D11Device()));
+	dynamic_cast<StaticMesh*>(testMesh.get())->SetScale({ 0.2f, 0.2f, 0.2f });
+	m_scene.AddMesh("M4A1.obj", std::move(testMesh));
 }
 
 void Renderer::Start(int threadPriority, uintptr_t affinityMask) {
@@ -41,7 +41,7 @@ RenderTarget& Renderer::GetRT() {
 }
 
 void Renderer::RenderLoop() {
-	while (m_running.load(std::memory_order_relaxed)) {
+	while (m_running.load(std::memory_order::relaxed)) {
 		std::unique_lock<std::mutex> lock(RenderQueue::Mutex());
 		RenderQueue::CV().wait(lock, [&] { 
 			return !m_running.load(std::memory_order::relaxed) ||
@@ -54,7 +54,6 @@ void Renderer::RenderLoop() {
 
 void Renderer::RenderFrame() {
 	m_renderTarget.BeginRender();
-	m_grid.Draw(m_renderTarget.Context());
-	m_testMesh.Draw(m_renderTarget.Context());
+	m_scene.DrawAll(m_renderTarget.Context());
 	m_renderTarget.EndRender();
 }

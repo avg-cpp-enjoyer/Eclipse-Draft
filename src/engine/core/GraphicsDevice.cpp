@@ -1,10 +1,12 @@
 ﻿#include "GraphicsDevice.hpp"
+#include "BufferManager.hpp"
 
 #include <engine/graphics/IShader.hpp>
 #include <engine/graphics/ShaderProgram.hpp>
 #include <engine/graphics/VertexShader.hpp>
 #include <engine/graphics/PixelShader.hpp>
 #include <engine/graphics/PipelineStateManager.hpp>
+
 #include <memory>
 #include <format>
 
@@ -12,10 +14,7 @@ void GraphicsDevice::Initialize() {
 	Instance().InitDXGIFactory();
 	Instance().InitD3D11Device();
 	Instance().InitShaders();
-	Instance().SetLightBuffer({ {0.0f, 5.0f, -5.0f}, 0.0f, {1.0f, 1.0f, 1.0f}, 0.0f });
-	Instance().SetGridParams({ 0.5f, 0.02f, 5.0f, 0.05f, 0.5f, {0.8f, 0.8f, 0.8f},  
-		{0.6f, 0.6f, 0.6f}, {0.0f, 0.5f, 1.0f}, {1.0f, 0.0f, 0.0f}, 0.3f, 50.0f });
-	Instance().InitBuffers();
+	BufferManager::Initialize(Instance().m_device.Get());
 	PipelineStateManager::Initialize(Instance().m_device.Get());
 #ifdef _DEBUG
 	Instance().EnableD3D11DebugLayer();
@@ -143,70 +142,4 @@ void GraphicsDevice::InitShaders() {
 	std::unique_ptr<IShader> gridShader = std::make_unique<PixelShader>();
 	gridShader->CompileFromFile(m_device.Get(), L"src\\shaders\\Grid.hlsl", "PSMain");
 	ShaderProgram::AddShader(std::move(gridShader));
-}
-
-void GraphicsDevice::InitBuffers() {
-	D3D11_BUFFER_DESC transformBufferDesc{};
-	transformBufferDesc.Usage      = D3D11_USAGE_DEFAULT;
-	transformBufferDesc.ByteWidth  = sizeof(TransformBuffer);
-	transformBufferDesc.BindFlags  = D3D11_BIND_CONSTANT_BUFFER;
-
-	D3D11_BUFFER_DESC lightBufferDesc{};
-	lightBufferDesc.Usage      = D3D11_USAGE_DEFAULT;
-	lightBufferDesc.ByteWidth  = sizeof(LightBuffer);
-	lightBufferDesc.BindFlags  = D3D11_BIND_CONSTANT_BUFFER;
-
-	D3D11_BUFFER_DESC gridParamsDesc{};
-	gridParamsDesc.Usage = D3D11_USAGE_DEFAULT;
-	gridParamsDesc.ByteWidth = sizeof(GridParams);
-	gridParamsDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-	auto align16 = [](uint32_t x) -> uint32_t { return (x + 15u) & ~15u; };
-	gridParamsDesc.ByteWidth = align16(sizeof(GridParams));
-
-	D3D11_BUFFER_DESC camDesc{};
-	camDesc.Usage = D3D11_USAGE_DEFAULT;
-	camDesc.ByteWidth = sizeof(CameraParams);
-	camDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-	HR_LOG(m_device->CreateBuffer(&transformBufferDesc, nullptr, &m_transformBuffer));
-	HR_LOG(m_device->CreateBuffer(&lightBufferDesc, nullptr, &m_lightBuffer));
-	HR_LOG(m_device->CreateBuffer(&gridParamsDesc, nullptr, &m_gridParamsBuffer));
-	HR_LOG(m_device->CreateBuffer(&camDesc, nullptr, &m_cameraParamsBuffer));
-}
-
-void GraphicsDevice::SetLightBuffer(const LightBuffer& buffer) {
-	Instance().m_lightBufferData = buffer;
-}
-
-void GraphicsDevice::UpdateLightBuffer(ID3D11DeviceContext* context) {
-	context->UpdateSubresource(Instance().m_lightBuffer.Get(), 0, nullptr, &Instance().m_lightBufferData, 0, 0);
-}
-
-ID3D11Buffer** GraphicsDevice::LightBufferAddr() {
-	return Instance().m_lightBuffer.GetAddressOf();
-}
-
-ID3D11Buffer** GraphicsDevice::TransformBufferAddr() {
-	return Instance().m_transformBuffer.GetAddressOf();
-}
-
-ID3D11Buffer* GraphicsDevice::TransformBufferPtr() {
-	return Instance().m_transformBuffer.Get();
-}
-
-void GraphicsDevice::SetGridParams(const GridParams& params) {
-	Instance().m_gridParams = params;
-}
-
-ID3D11Buffer* GraphicsDevice::GridParamsBuffer() {
-	return Instance().m_gridParamsBuffer.Get();
-}
-
-GridParams& GraphicsDevice::GridParamsData() {
-	return Instance().m_gridParams;
-}
-
-ID3D11Buffer* GraphicsDevice::CameraParamsBuffer() {
-	return Instance().m_cameraParamsBuffer.Get();
 }

@@ -16,7 +16,7 @@ cbuffer LightBuffer : register(b1) {
 
 float4 PSMain(VSOutput input) : SV_TARGET {
     float3 light    = normalize(lightPos - input.worldPos);
-    float  diff      = saturate(dot(input.normal, light));
+    float  diff     = saturate(dot(input.normal, light));
     float3 ambient  = 0.6f * input.col.rgb;
     float3 diffuse  = diff * lightColor * input.col.rgb;
     

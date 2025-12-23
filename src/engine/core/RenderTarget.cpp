@@ -1,6 +1,9 @@
 ﻿#include "RenderTarget.hpp"
+#include "ConstantBuffers.hpp"
+#include "RenderQueue.hpp"
+#include "BufferManager.hpp"
 
-#include <engine/core/RenderQueue.hpp>
+#include <utils/Log.hpp>
 
 RenderTarget::RenderTarget(HWND window) : m_window(window) {
 	RECT windowRect{};
@@ -74,16 +77,20 @@ void RenderTarget::BeginRender() {
 
 	CameraParams cam{};
 	cam.cameraPos = m_camera.Position();
-	__m128 clearColor = _mm_set_ps(1.0f, 0.15f, 0.1f, 0.1f);
-	m_deferredContext->ClearRenderTargetView(m_rtv.Get(), reinterpret_cast<const float*>(&clearColor));
+	float clearColor[] = { 0.1f, 0.1f, 0.15f, 1.0f };
+	m_deferredContext->ClearRenderTargetView(m_rtv.Get(), clearColor);
 	m_deferredContext->RSSetViewports(1, &viewport);
 	m_deferredContext->OMSetRenderTargets(1, m_rtv.GetAddressOf(), m_depthStencilView.Get());
 	m_deferredContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	m_deferredContext->PSSetConstantBuffers(1, 1, GraphicsDevice::LightBufferAddr());
-	m_deferredContext->VSSetConstantBuffers(0, 1, GraphicsDevice::TransformBufferAddr());
-	m_deferredContext->UpdateSubresource(GraphicsDevice::CameraParamsBuffer(), 0, nullptr, &cam, 0, 0);
 
-	GraphicsDevice::UpdateLightBuffer(m_deferredContext.Get());
+	ID3D11Buffer* lightBuffer = BufferManager::GetLightBuffer();
+	m_deferredContext->PSSetConstantBuffers(1, 1, &lightBuffer);
+
+	ID3D11Buffer* transformBuffer = BufferManager::GetTransformBuffer();
+	m_deferredContext->VSSetConstantBuffers(0, 1, &transformBuffer);
+
+	BufferManager::UpdateCameraBuffer(m_deferredContext.Get(), cam);
+	BufferManager::UpdateLightBuffer(m_deferredContext.Get());
 	GraphicsDevice::SetProjectionMatrix(90.0f, float(m_width) / float(m_height), 0.1f, 1000.0f);
 	GraphicsDevice::SetViewMatrix(m_camera.ViewMatrix());
 }

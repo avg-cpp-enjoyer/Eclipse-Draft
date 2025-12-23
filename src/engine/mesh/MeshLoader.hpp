@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mesh.hpp"
+#include "StaticMesh.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -36,5 +36,5 @@ struct VertexKeyHasher {
 
 class MeshLoader {
 public:
-	static Mesh LoadFromOBJ(const std::string& path, ID3D11Device* device);
+	static StaticMesh LoadFromOBJ(const std::string& path, ID3D11Device* device);
 };

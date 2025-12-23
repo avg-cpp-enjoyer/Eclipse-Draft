@@ -1,8 +1,7 @@
-#include <engine/mesh/Mesh.hpp>
+#include <engine/mesh/StaticMesh.hpp>
+#include <d3d11.h>
 
-class Grid : public Mesh {
+class Grid : public StaticMesh {
 public:
-	Grid() = default;
-	~Grid() = default;
 	void Draw(ID3D11DeviceContext* context) const override;
 };

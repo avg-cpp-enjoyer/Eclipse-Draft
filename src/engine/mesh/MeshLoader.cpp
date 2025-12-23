@@ -1,6 +1,6 @@
 ﻿#include "MeshLoader.hpp"
 
-Mesh MeshLoader::LoadFromOBJ(const std::string& path, ID3D11Device* device) {
+StaticMesh MeshLoader::LoadFromOBJ(const std::string& path, ID3D11Device* device) {
 	std::ifstream file(path);
 	if (!file.is_open()) {
 		throw std::runtime_error("Cannot open OBJ file: " + path);
@@ -180,7 +180,7 @@ Mesh MeshLoader::LoadFromOBJ(const std::string& path, ID3D11Device* device) {
 		}
 	}
 
-	Mesh mesh;
+	StaticMesh mesh;
 	mesh.SetVertices(vertices);
 	mesh.SetIndices(indices);
 	mesh.CreateBuffers(device);

@@ -1,14 +1,17 @@
 #pragma once
 
 #include "RenderTarget.hpp"
-#include <engine/mesh/Mesh.hpp>
-#include <engine/scene/Grid.hpp>
-#include <engine/mesh/MeshLoader.hpp>
+
+#include <engine/scene/Scene.hpp>
+#include <thread>
+#include <atomic>
+#include <Windows.h>
+#include <cstdarg>
 
 class Renderer {
 public:
 	explicit Renderer(HWND window);
-	virtual ~Renderer() = default;
+	~Renderer() = default;
 
 	void Start(int threadPriority, uintptr_t affinityMask);
 	void Shutdown();
@@ -19,8 +22,7 @@ protected:
 protected:
 	RenderTarget m_renderTarget;
 	std::thread m_renderThread;
-	std::atomic_bool m_running{ false };
+	std::atomic<bool> m_running{ false };
 	HWND m_window;
-	Mesh m_testMesh;
-	Grid m_grid;
+	Scene m_scene;
 };
