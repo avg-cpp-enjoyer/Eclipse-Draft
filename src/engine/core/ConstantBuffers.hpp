@@ -18,16 +18,17 @@ __declspec(align(16)) struct LightBuffer {
 __declspec(align(16)) struct GridParams {
 	float cellSize;
 	float lineWidth;
-	float majorStep;
-	float majorWidth;
 	float baseAlpha;
+	float padding1;
 	DirectX::XMFLOAT3 gridColor;
-	DirectX::XMFLOAT3 majorColor;
+	float padding2;
 	DirectX::XMFLOAT3 axisXColor;
+	float padding3;
 	DirectX::XMFLOAT3 axisZColor;
+	float padding4;
 	float axisWidth;
 	float fadeDistance;
-	float _pad[2];
+	float padding5[2];
 };
 
 __declspec(align(16)) struct CameraParams {

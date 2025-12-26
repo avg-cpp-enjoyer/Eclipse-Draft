@@ -7,6 +7,7 @@
 #include <engine/graphics/VertexShader.hpp>
 #include <engine/graphics/PixelShader.hpp>
 #include <engine/graphics/PipelineStateManager.hpp>
+#include <engine/scene/Camera.hpp>
 #include <utils/Direct3D11Utils.hpp>
 #include <utils/Log.hpp>
 
@@ -36,11 +37,11 @@ void StaticMesh::CreateBuffers(ID3D11Device* device) {
 	HR_LOG(device->CreateBuffer(&ibd, &iinit, &m_indexBuffer));
 }
 
-void StaticMesh::Draw(ID3D11DeviceContext* context) const {
+void StaticMesh::Draw(ID3D11DeviceContext* context, const Camera& camera) const {
 	TransformBuffer transformBuffer{};
 	transformBuffer.world       = Direct3D11Utils::SetWorldMatrix(m_position, m_rotation, m_scale);
-	transformBuffer.view        = GraphicsDevice::ViewMatrix();
-	transformBuffer.projection  = GraphicsDevice::ProjectionMatrix();
+	transformBuffer.view        = camera.ViewMatrix();
+	transformBuffer.projection  = camera.ProjectionMatrix();
 
 	uint32_t stride = sizeof(Vertex);
 	uint32_t offset = 0;
@@ -54,7 +55,7 @@ void StaticMesh::Draw(ID3D11DeviceContext* context) const {
 	context->OMSetBlendState(state.blend, nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(state.depthStencil, 0);
 
-	BufferManager::UpdateTransformBuffer(context, transformBuffer);
+	BufferManager::UpdateBuffer(context, transformBuffer);
 	context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

@@ -10,6 +10,7 @@
 #include <string>
 #include <functional>
 #include <d3d11.h>
+#include "Camera.hpp"
 
 Scene::Scene() {
 	StaticMesh grid = MeshLoader::LoadFromOBJ("assets\\grid.obj", GraphicsDevice::D3D11Device());
@@ -48,9 +49,9 @@ void Scene::ForEachMesh(const std::function<void(IMesh*)>& func) {
 	}
 }
 
-void Scene::DrawAll(ID3D11DeviceContext* context) {
-	m_grid.Draw(context); 
+void Scene::DrawAll(ID3D11DeviceContext* context, const Camera& camera) {
+	m_grid.Draw(context, camera); 
 	for (auto& mesh : m_meshes) { 
-		mesh->Draw(context); 
+		mesh->Draw(context, camera); 
 	}
 }

@@ -54,6 +54,6 @@ void Renderer::RenderLoop() {
 
 void Renderer::RenderFrame() {
 	m_renderTarget.BeginRender();
-	m_scene.DrawAll(m_renderTarget.Context());
+	m_scene.DrawAll(m_renderTarget.Context(), m_renderTarget.GetCamera());
 	m_renderTarget.EndRender();
 }

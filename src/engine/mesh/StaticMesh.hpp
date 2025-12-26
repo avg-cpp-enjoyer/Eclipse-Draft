@@ -6,6 +6,7 @@
 #include <vector>
 #include <d3d11.h>
 #include <wrl/client.h>
+#include <engine/scene/Camera.hpp>
 #include <DirectXMath.h>
 #include <cstdint>
 
@@ -15,7 +16,7 @@ public:
 	~StaticMesh() = default;
 
 	void CreateBuffers(ID3D11Device* device) override;
-	virtual void Draw(ID3D11DeviceContext* context) const override;
+	virtual void Draw(ID3D11DeviceContext* context, const Camera& camera) const override;
 	void Update(float deltaTime) override {}
 	void SetPosition(const DirectX::XMFLOAT3& pos);
 	void SetRotation(const DirectX::XMFLOAT3& rotation);

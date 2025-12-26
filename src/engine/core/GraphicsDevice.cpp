@@ -9,34 +9,41 @@
 
 #include <memory>
 #include <format>
+#include <d3d11sdklayers.h>
+#include <dxgi1_6.h>
+#include <d3d11.h>
+#include <cstdint>
+#include <wrl/client.h>
+#include <dxgidebug.h>
+#include <Windows.h>
+#include <utils/Log.hpp>
+#include <dxgi1_3.h>
+#include <cstdlib>
+#include <utility>
+#include <d3dcommon.h>
 
 void GraphicsDevice::Initialize() {
-	Instance().InitDXGIFactory();
-	Instance().InitD3D11Device();
-	Instance().InitShaders();
-	BufferManager::Initialize(Instance().m_device.Get());
-	PipelineStateManager::Initialize(Instance().m_device.Get());
+	InitDXGIFactory();
+	InitD3D11Device();
+	InitShaders();
+	BufferManager::Initialize(m_device.Get());
+	PipelineStateManager::Initialize(m_device.Get());
 #ifdef _DEBUG
-	Instance().EnableD3D11DebugLayer();
-	Instance().EnableDXGIDebugLayer();
+	EnableD3D11DebugLayer();
+	EnableDXGIDebugLayer();
 #endif
 }
 
 IDXGIFactory6* GraphicsDevice::DXGIFactory() {
-	return Instance().m_dxgiFactory.Get();
+	return m_dxgiFactory.Get();
 }
 
 ID3D11DeviceContext* GraphicsDevice::ImmediateContext() {
-	return Instance().m_immediateContext.Get();
+	return m_immediateContext.Get();
 }
 
 ID3D11Device* GraphicsDevice::D3D11Device() {
-	return Instance().m_device.Get();
-}
-
-GraphicsDevice& GraphicsDevice::Instance() {
-	static GraphicsDevice instance;
-	return instance;
+	return m_device.Get();
 }
 
 void GraphicsDevice::EnableDXGIDebugLayer() {
@@ -63,25 +70,9 @@ void GraphicsDevice::EnableD3D11DebugLayer() {
 }
 
 void GraphicsDevice::DumpD3D11LiveObjects() {
-	if (Instance().m_d3d11Debug) {
-		Instance().m_d3d11Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	if (m_d3d11Debug) {
+		m_d3d11Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	}
-}
-
-void GraphicsDevice::SetViewMatrix(const DirectX::XMMATRIX& view) {
-	Instance().m_viewMatrix = view;
-}
-
-void GraphicsDevice::SetProjectionMatrix(float fov, float aspectRatio, float zNear, float zFar) {
-	Instance().m_projMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(fov), aspectRatio, zNear, zFar);
-}
-
-const DirectX::XMMATRIX& GraphicsDevice::ViewMatrix() {
-	return Instance().m_viewMatrix;
-}
-
-const DirectX::XMMATRIX& GraphicsDevice::ProjectionMatrix() {
-	return Instance().m_projMatrix;
 }
 
 Microsoft::WRL::ComPtr<IDXGIAdapter4> GraphicsDevice::PickBestAdapter() {

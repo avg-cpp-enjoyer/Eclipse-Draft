@@ -10,16 +10,17 @@ struct VSOutput {
 cbuffer GridParams : register(b2) {
     float cellSize;
     float lineWidth; 
-    float majorStep; 
-    float majorWidth; 
-    float baseAlpha; 
+    float baseAlpha;
+    float padding1;
     float3 gridColor;
-    float3 majorColor;
+    float padding2;
     float3 axisXColor;
+    float padding3;
     float3 axisZColor;
+    float padding4;
     float axisWidth; 
     float fadeDistance;
-    float pad[2];
+    float padding5[2];
 };
 
 cbuffer CameraParams : register(b3) {
@@ -64,7 +65,7 @@ float4 PSMain(VSOutput input) : SV_TARGET {
     col = lerp(col, axisZColor, az);
 
     float dist = distance(input.worldPos, cameraPos);
-    float fade = saturate(1.0 - dist / 50.0f);
+    float fade = saturate(1.0 - dist / fadeDistance);
     float alpha = lineMask * baseAlpha * fade;
 
     return float4(col, alpha);

@@ -2,20 +2,20 @@
 
 #include <Windows.h>
 #include <DirectXMath.h>
-#include <algorithm>
+#include <cstdint>
 
 class Camera {
 public:
-	Camera() = default;
-	~Camera() = default;
-
 	void OnMouseButtonDown(int x, int y);
 	void OnMouseButtonUp();
 	void OnMouseMove(int x, int y);
 	void OnMouseWheel(int16_t delta);
+	void SetProjectionMatrix(const DirectX::XMMATRIX& matrix);
 	DirectX::XMMATRIX ViewMatrix() const;
+	DirectX::XMMATRIX ProjectionMatrix() const;
 	DirectX::XMFLOAT3 Position() const;
 private:
+	DirectX::XMMATRIX m_projectionMatrix{};
 	float m_radius = 10.0f;
 	float m_yaw = 0.0f; 
 	float m_pitch = 0.0f;

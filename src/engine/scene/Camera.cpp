@@ -1,5 +1,12 @@
 #include "Camera.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <DirectXMathMatrix.inl>
+#include <DirectXMathVector.inl>
+#include <DirectXMath.h>
+#include <cstdint>
+
 void Camera::OnMouseButtonDown(int x, int y) {
 	m_rotating = true;
 	m_lastMousePos = { x, y };
@@ -35,6 +42,14 @@ DirectX::XMMATRIX Camera::ViewMatrix() const {
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	return DirectX::XMMatrixLookAtLH(eye, target, up);
+}
+
+void Camera::SetProjectionMatrix(const DirectX::XMMATRIX& matrix) {
+	m_projectionMatrix = matrix;
+}
+
+DirectX::XMMATRIX Camera::ProjectionMatrix() const {
+	return m_projectionMatrix;
 }
 
 DirectX::XMFLOAT3 Camera::Position() const {

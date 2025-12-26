@@ -1,27 +1,34 @@
 #include "BufferManager.hpp"
+#include "ConstantBuffers.hpp"
+#include "ConstantBuffer.hpp"
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <utility>
+#include <memory>
 
 void BufferManager::Initialize(ID3D11Device* device) {
-	m_transformBuffer.Initialize(device);
-	m_lightBuffer.Initialize(device);
-	m_gridBuffer.Initialize(device);
-	m_cameraBuffer.Initialize(device);
+	auto transformBuf = std::make_unique<ConstantBuffer<TransformBuffer>>();
+	transformBuf->Initialize(device);
+	m_buffers[typeid(TransformBuffer)] = std::move(transformBuf);
 
-	m_lightBufferData = {
-		.lightPos = DirectX::XMFLOAT3(0.0f, 5.0f, -5.0f),
-		.lightColor = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f)
-	};
+	auto lightBuf = std::make_unique<ConstantBuffer<LightBuffer>>();
+	lightBuf->Initialize(device);
+	m_buffers[typeid(LightBuffer)] = std::move(lightBuf);
+
+	auto gridParams = std::make_unique<ConstantBuffer<GridParams>>();
+	gridParams->Initialize(device);
+	m_buffers[typeid(GridParams)] = std::move(gridParams);
+
+	auto cameraParams = std::make_unique<ConstantBuffer<CameraParams>>();
+	cameraParams->Initialize(device);
+	m_buffers[typeid(CameraParams)] = std::move(cameraParams);
 
 	m_gridParamsData = { 
 		.cellSize = 0.5f, 
 		.lineWidth = 0.02f, 
-		.majorStep = 5.0f, 
-		.majorWidth = 0.05f, 
 		.baseAlpha = 0.5f, 
 		.gridColor = DirectX::XMFLOAT3(0.8f, 0.8f, 0.8f), 
-		.majorColor = DirectX::XMFLOAT3(0.6f, 0.6f, 0.6f), 
 		.axisXColor = DirectX::XMFLOAT3(0.0f, 0.5f, 1.0f), 
 		.axisZColor = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f), 
 		.axisWidth = 0.3f, 
@@ -29,34 +36,6 @@ void BufferManager::Initialize(ID3D11Device* device) {
 	};
 }
 
-void BufferManager::UpdateTransformBuffer(ID3D11DeviceContext* context, const TransformBuffer& data) {
-	m_transformBuffer.Update(context, data);
-}
-
-void BufferManager::UpdateLightBuffer(ID3D11DeviceContext* context) {
-	m_lightBuffer.Update(context, m_lightBufferData);
-}
-
 void BufferManager::UpdateGridBuffer(ID3D11DeviceContext* context) {
-	m_gridBuffer.Update(context, m_gridParamsData);
-}
-
-void BufferManager::UpdateCameraBuffer(ID3D11DeviceContext* context, const CameraParams& data) {
-	m_cameraBuffer.Update(context, data);
-}
-
-ID3D11Buffer* BufferManager::GetTransformBuffer() {
-	return m_transformBuffer.Get();
-}
-
-ID3D11Buffer* BufferManager::GetLightBuffer() {
-	return m_lightBuffer.Get();
-}
-
-ID3D11Buffer* BufferManager::GetGridBuffer() {
-	return m_gridBuffer.Get();
-}
-
-ID3D11Buffer* BufferManager::GetCameraBuffer() {
-	return m_cameraBuffer.Get();
+	UpdateBuffer(context, m_gridParamsData);
 }

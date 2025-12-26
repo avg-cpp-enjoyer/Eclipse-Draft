@@ -13,16 +13,11 @@ public:
 	template <typename T> requires std::is_base_of_v<IShader, T>
 	static T* GetShaderByName(std::wstring_view shaderName);
 private:
-	ShaderProgram() = default;
-	~ShaderProgram() = default;
-	static ShaderProgram& GetInstance();
-private:
-	std::unordered_map<std::wstring_view, std::unique_ptr<IShader>> m_shaders;
+	inline static std::unordered_map<std::wstring_view, std::unique_ptr<IShader>> m_shaders;
 };
 
 template <typename T> requires std::is_base_of_v<IShader, T>
 T* ShaderProgram::GetShaderByName(std::wstring_view shaderName) {
-	auto& shaders = GetInstance().m_shaders;
-	auto it = shaders.find(shaderName);
-	return it != shaders.end() ? dynamic_cast<T*>(it->second.get()) : nullptr;
+	auto it = m_shaders.find(shaderName);
+	return it != m_shaders.end() ? dynamic_cast<T*>(it->second.get()) : nullptr;
 }

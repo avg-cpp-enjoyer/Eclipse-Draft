@@ -1,8 +1,6 @@
 #pragma once
 
-#include <d3d11.h>
 #include <DirectXMath.h>
-#include <cstdint>
 
 namespace Direct3D11Utils {
 	inline DirectX::XMMATRIX SetWorldMatrix(const DirectX::XMFLOAT3& pos,

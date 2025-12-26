@@ -4,23 +4,33 @@
 #include "ConstantBuffer.hpp"
 
 #include <d3d11.h>
+#include <typeindex>
+#include <memory>
+#include <unordered_map>
 
 class BufferManager { 
 public: 
 	static void Initialize(ID3D11Device* device);
-	static void UpdateTransformBuffer(ID3D11DeviceContext* context, const TransformBuffer& data);
-	static void UpdateLightBuffer(ID3D11DeviceContext* context);
+	template <IsConstantBufferType T>
+	static void UpdateBuffer(ID3D11DeviceContext* context, const T& data);
 	static void UpdateGridBuffer(ID3D11DeviceContext* context);
-	static void UpdateCameraBuffer(ID3D11DeviceContext* context, const CameraParams& data);
-	static ID3D11Buffer* GetTransformBuffer();
-	static ID3D11Buffer* GetLightBuffer();
-	static ID3D11Buffer* GetGridBuffer();
-	static ID3D11Buffer* GetCameraBuffer();
+	template <IsConstantBufferType T>
+	static ID3D11Buffer* GetBuffer();
 private: 
-	inline static ConstantBuffer<TransformBuffer> m_transformBuffer; 
-	inline static ConstantBuffer<LightBuffer> m_lightBuffer; 
-	inline static ConstantBuffer<GridParams> m_gridBuffer; 
-	inline static ConstantBuffer<CameraParams> m_cameraBuffer; 
-	inline static LightBuffer m_lightBufferData; //TODO: Bind light direction to camera orientation. LightBuffer needs to be stored inside RenderTarget
+	static inline std::unordered_map<std::type_index, std::unique_ptr<IConstantBuffer>> m_buffers;
 	inline static GridParams m_gridParamsData;
 };
+
+template<IsConstantBufferType T>
+inline void BufferManager::UpdateBuffer(ID3D11DeviceContext* context, const T& data) {
+	auto it = m_buffers.find(typeid(T)); 
+	if (it != m_buffers.end()) { 
+		static_cast<ConstantBuffer<T>*>(it->second.get())->Update(context, data); 
+	}
+}
+
+template<IsConstantBufferType T>
+inline ID3D11Buffer* BufferManager::GetBuffer() {
+	auto it = m_buffers.find(typeid(T)); 
+	return it != m_buffers.end() ? it->second->Get() : nullptr;
+}

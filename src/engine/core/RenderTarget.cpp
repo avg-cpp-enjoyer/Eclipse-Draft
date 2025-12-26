@@ -4,12 +4,17 @@
 #include "BufferManager.hpp"
 
 #include <utils/Log.hpp>
+#include <DirectXMathMatrix.inl>
+#include <DirectXMath.h>
 
 RenderTarget::RenderTarget(HWND window) : m_window(window) {
 	RECT windowRect{};
 	GetClientRect(m_window, &windowRect);
 	m_width = windowRect.right - windowRect.left;
 	m_height = windowRect.bottom - windowRect.top;
+	float w = static_cast<float>(m_width);
+	float h = static_cast<float>(m_height);
+	m_camera.SetProjectionMatrix(DirectX::XMMatrixPerspectiveFovLH(1.5707f, w / h, 0.1f, 1000.0f));
 	Initialize();
 }
 
@@ -59,8 +64,6 @@ void RenderTarget::HandleResize() {
 	m_depthStencilView.Reset();
 	m_depthStencilBuffer.Reset();
 	InitDepthStencilView();
-	GraphicsDevice::SetProjectionMatrix(90.0f, float(newWidth) / float(newHeight), 0.1f, 1000.0f);
-	GraphicsDevice::SetViewMatrix(m_camera.ViewMatrix());
 
 	m_width = newWidth;
 	m_height = newHeight;
@@ -75,24 +78,26 @@ void RenderTarget::BeginRender() {
 	viewport.MinDepth  = 0.0f;
 	viewport.MaxDepth  = 1.0f;
 
-	CameraParams cam{};
-	cam.cameraPos = m_camera.Position();
+	CameraParams cameraParams{};
+	cameraParams.cameraPos = m_camera.Position();
 	float clearColor[] = { 0.1f, 0.1f, 0.15f, 1.0f };
 	m_deferredContext->ClearRenderTargetView(m_rtv.Get(), clearColor);
 	m_deferredContext->RSSetViewports(1, &viewport);
 	m_deferredContext->OMSetRenderTargets(1, m_rtv.GetAddressOf(), m_depthStencilView.Get());
 	m_deferredContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	ID3D11Buffer* lightBuffer = BufferManager::GetLightBuffer();
+	ID3D11Buffer* lightBuffer = BufferManager::GetBuffer<LightBuffer>();
 	m_deferredContext->PSSetConstantBuffers(1, 1, &lightBuffer);
 
-	ID3D11Buffer* transformBuffer = BufferManager::GetTransformBuffer();
+	ID3D11Buffer* transformBuffer = BufferManager::GetBuffer<TransformBuffer>();
 	m_deferredContext->VSSetConstantBuffers(0, 1, &transformBuffer);
 
-	BufferManager::UpdateCameraBuffer(m_deferredContext.Get(), cam);
-	BufferManager::UpdateLightBuffer(m_deferredContext.Get());
-	GraphicsDevice::SetProjectionMatrix(90.0f, float(m_width) / float(m_height), 0.1f, 1000.0f);
-	GraphicsDevice::SetViewMatrix(m_camera.ViewMatrix());
+	LightBuffer lightBufData{};
+	lightBufData.lightPos = cameraParams.cameraPos;
+	lightBufData.lightColor = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+
+	BufferManager::UpdateBuffer(m_deferredContext.Get(), cameraParams);
+	BufferManager::UpdateBuffer(m_deferredContext.Get(), lightBufData);
 }
 
 void RenderTarget::EndRender() {

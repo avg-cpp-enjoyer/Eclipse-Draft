@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Grid.hpp"
+#include "Camera.hpp"
 
 #include <engine/mesh/IMesh.hpp>
 #include <memory>
@@ -13,13 +14,12 @@
 class Scene {
 public:
 	Scene();
-	~Scene() = default;
 
 	void AddMesh(const std::string& name, std::unique_ptr<IMesh> mesh);
 	IMesh* GetMeshByName(const std::string& name);
 	void RemoveMesh(const std::string& name);
 	void ForEachMesh(const std::function<void(IMesh*)>& func);
-	void DrawAll(ID3D11DeviceContext* context);
+	void DrawAll(ID3D11DeviceContext* context, const Camera& camera);
 private:
 	std::unordered_map<std::string, IMesh*> m_lookupTable;
 	std::vector<std::unique_ptr<IMesh>> m_meshes;

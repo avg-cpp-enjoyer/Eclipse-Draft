@@ -6,6 +6,7 @@
 #include <d3d11.h>
 #include <utils/Log.hpp>
 #include <wrl/client.h>
+#include <Windows.h>
 
 template <typename T> 
 concept IsConstantBufferType = 
@@ -14,12 +15,17 @@ concept IsConstantBufferType =
 	std::is_same_v<T, GridParams> || 
 	std::is_same_v<T, CameraParams>;
 
+interface __declspec(novtable) IConstantBuffer { 
+	virtual ~IConstantBuffer() = default; 
+	virtual ID3D11Buffer* Get() const = 0; 
+};
+
 template <IsConstantBufferType T>
-class ConstantBuffer {
+class ConstantBuffer : public IConstantBuffer {
 public:
 	void Initialize(ID3D11Device* device);
 	void Update(ID3D11DeviceContext* context, const T& data);
-	ID3D11Buffer* Get() const;
+	ID3D11Buffer* Get() const override;
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_buffer;
 };

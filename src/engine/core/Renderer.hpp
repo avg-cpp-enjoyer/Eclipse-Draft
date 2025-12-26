@@ -16,10 +16,10 @@ public:
 	void Start(int threadPriority, uintptr_t affinityMask);
 	void Shutdown();
 	RenderTarget& GetRT();
-protected:
+private:
 	void RenderLoop();
 	void RenderFrame();
-protected:
+private:
 	RenderTarget m_renderTarget;
 	std::thread m_renderThread;
 	std::atomic<bool> m_running{ false };

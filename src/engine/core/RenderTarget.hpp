@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GraphicsDevice.hpp"
+#include "ConstantBuffers.hpp"
 
 #include <engine/scene/Camera.hpp>
 #include <d3d11.h>
@@ -32,6 +33,7 @@ private:
 	uint32_t m_width = 0;
 	uint32_t m_height = 0;
 	Camera m_camera;
+	LightBuffer m_lightBufferData;
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain4>         m_swapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  m_rtv;
